@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Team Engagement</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fafaf9;color:#1a1a18;font-size:14px;line-height:1.5}
+.app{max-width:860px;margin:0 auto;padding:2rem 1.25rem}
+h2{font-size:20px;font-weight:600;margin-bottom:4px}
+.subtitle{font-size:13px;color:#888;margin-bottom:1.5rem}
+
+.name-bar{display:flex;gap:10px;align-items:center;margin-bottom:1.5rem;padding:10px 14px;background:#f2f0e8;border-radius:10px;border:1px solid #e8e5dc}
+.name-bar label{font-size:13px;color:#666;white-space:nowrap;font-weight:500}
+.name-bar input{flex:1;max-width:180px;font-size:13px;height:32px;padding:0 10px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#1a1a18;outline:none}
+.name-bar input:focus{border-color:#888}
+.name-bar span{font-size:12px;color:#aaa}
+
+.tabs{display:flex;margin-bottom:1.5rem;border-bottom:1px solid #e0ddd4}
+.tab{font-size:13px;padding:8px 16px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.active{color:#1a1a18;font-weight:500;border-bottom-color:#1a1a18}
+.tab:hover:not(.active){color:#444}
+.pane{display:none}.pane.active{display:block}
+
+/* DRAFT PANE */
+.how-to{display:flex;gap:12px;margin-bottom:1.5rem}
+.step{background:#fff;border:1px solid #e8e5dc;border-radius:10px;padding:12px 14px;flex:1;font-size:12px;color:#666;line-height:1.6}
+.step strong{display:block;font-size:13px;color:#1a1a18;margin-bottom:4px;font-weight:600}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#1a1a18;color:#fff;font-size:11px;font-weight:600;margin-right:6px;flex-shrink:0;vertical-align:middle}
+@media(max-width:580px){.how-to{flex-direction:column}}
+
+.draft-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem}
+@media(max-width:620px){.draft-grid{grid-template-columns:1fr}}
+
+.panel{background:#fff;border:1px solid #e8e5dc;border-radius:12px;padding:1.125rem 1.25rem}
+.panel-label{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+
+.field-row{margin-bottom:10px}
+.field-row label{display:block;font-size:12px;color:#888;margin-bottom:4px}
+.field-row input{width:100%;font-size:13px;height:34px;padding:0 10px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a18;outline:none}
+.field-row input:focus{border-color:#888}
+textarea{width:100%;font-size:13px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a18;outline:none;resize:vertical;font-family:inherit;line-height:1.6}
+textarea:focus{border-color:#888}
+
+.tone-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tone-btn{font-size:12px;height:28px;padding:0 12px;border:1px solid #ddd;border-radius:20px;background:#fff;color:#666;cursor:pointer;white-space:nowrap}
+.tone-btn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.tone-btn:hover:not(.active){border-color:#999;color:#333}
+
+.btn-primary{height:38px;padding:0 20px;font-size:13px;font-weight:600;border:none;border-radius:8px;background:#1a1a18;color:#fff;cursor:pointer;width:100%}
+.btn-primary:hover{background:#333}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+
+.output-panel{min-height:180px;position:relative}
+.output-placeholder{color:#bbb;font-size:13px;line-height:1.7;padding-top:4px}
+.comment-text{font-size:13px;color:#1a1a18;line-height:1.75;white-space:pre-wrap}
+
+.output-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.btn-sm{font-size:12px;height:30px;padding:0 14px;border:1px solid #ccc;border-radius:7px;background:#fff;color:#555;cursor:pointer;white-space:nowrap}
+.btn-sm:hover{color:#1a1a18;border-color:#999}
+.btn-add{color:#2d6da8;border-color:#6da8d4;font-weight:500}
+.btn-add:hover{background:#dce8f5}
+.copied{color:#1e6e3a!important;border-color:#5a9e6f!important}
+
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #ddd;border-top-color:#555;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+.spinner.white{border:2px solid rgba(255,255,255,.3);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.err-msg{font-size:12px;color:#a83232;margin-top:8px}
+
+/* QUEUE PANE */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
+.stat-card{background:#f2f0e8;border-radius:10px;padding:.875rem 1rem;text-align:center}
+.stat-num{font-size:26px;font-weight:600;color:#1a1a18}
+.stat-label{font-size:12px;color:#888;margin-top:2px}
+
+.queue-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.queue-top select{font-size:12px;height:30px;padding:0 10px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a18;outline:none}
+.refresh-link{font-size:12px;color:#888;cursor:pointer;background:none;border:none;text-decoration:underline}
+
+.post-card{background:#fff;border:1px solid #e8e5dc;border-radius:12px;padding:1.125rem 1.25rem;margin-bottom:.875rem}
+.post-card.claimed{border-color:#d4a017}
+.post-card.done{border-color:#5a9e6f;opacity:.82}
+.post-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.post-meta{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:#dce8f5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#2d6da8;flex-shrink:0}
+.post-author{font-size:13px;font-weight:500}
+.post-role{font-size:12px;color:#888}
+.badge{display:inline-flex;align-items:center;font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap;font-weight:500}
+.badge-available{background:#f0eeea;color:#666}
+.badge-claimed{background:#fef3d0;color:#8a6000}
+.badge-done{background:#d6eedd;color:#1e6e3a}
+.post-snippet{font-size:13px;color:#444;line-height:1.65;margin-bottom:8px;font-style:italic}
+.post-url{font-size:12px;color:#2d6da8;text-decoration:none;display:block;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.post-url:hover{text-decoration:underline}
+.comment-box{background:#f7f5f0;border-radius:8px;padding:12px 14px}
+.comment-label{font-size:10px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+.comment-text-q{font-size:13px;color:#1a1a18;line-height:1.7;white-space:pre-wrap}
+.card-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.btn-claim{color:#8a6000;border-color:#d4a017}
+.btn-claim:hover{background:#fef3d0}
+.btn-done{color:#1e6e3a;border-color:#5a9e6f}
+.btn-done:hover{background:#d6eedd}
+.btn-danger{color:#a83232;border-color:#c47070}
+.btn-danger:hover{background:#fde8e8}
+.found-by{font-size:11px;color:#bbb;margin-top:8px}
+.empty{text-align:center;padding:3rem 1rem;color:#aaa;font-size:14px}
+
+/* LOG PANE */
+.log-item{font-size:12px;color:#666;padding:7px 0;border-bottom:1px solid #eee;display:flex;gap:10px}
+.log-time{color:#bbb;flex-shrink:0;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <h2>LinkedIn team engagement</h2>
+  <p class="subtitle">Paste any LinkedIn post → get an AI-drafted comment → track it in the shared team queue</p>
+
+  <div class="name-bar">
+    <label>Your name:</label>
+    <input type="text" id="nameInput" placeholder="e.g. Megan" maxlength="30" oninput="saveName()" />
+    <span>so teammates know who's commenting what</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('draft')">Draft a comment</div>
+    <div class="tab" onclick="switchTab('queue')">Team queue <span id="queueCount"></span></div>
+    <div class="tab" onclick="switchTab('log')">Activity log</div>
+  </div>
+
+  <!-- DRAFT PANE -->
+  <div class="pane active" id="pane-draft">
+
+    <div class="how-to">
+      <div class="step"><strong><span class="step-num">1</span>Find a post on LinkedIn</strong>Copy the post text from your feed — any relevant genetics or cardiology post you come across.</div>
+      <div class="step"><strong><span class="step-num">2</span>Paste it here + draft</strong>Fill in the author details, paste the post, pick a tone, and hit Draft comment.</div>
+      <div class="step"><strong><span class="step-num">3</span>Copy, post, and log it</strong>Copy the comment, go post it on LinkedIn, then add it to the team queue so nobody double-comments.</div>
+    </div>
+
+    <div class="draft-grid">
+      <!-- LEFT: Input -->
+      <div class="panel">
+        <div class="panel-label">Post details</div>
+
+        <div class="field-row">
+          <label>Author name</label>
+          <input type="text" id="authorName" placeholder="e.g. Dr. Jane Smith" />
+        </div>
+        <div class="field-row">
+          <label>Author role / institution <span style="color:#bbb">(optional)</span></label>
+          <input type="text" id="authorRole" placeholder="e.g. Cardiologist at Mayo Clinic" />
+        </div>
+        <div class="field-row">
+          <label>LinkedIn post URL <span style="color:#bbb">(optional — for queue tracking)</span></label>
+          <input type="text" id="postUrl" placeholder="https://linkedin.com/posts/..." />
+        </div>
+        <div class="field-row">
+          <label>Paste the post text</label>
+          <textarea id="postText" rows="7" placeholder="Paste the full LinkedIn post text here…"></textarea>
+        </div>
+
+        <div class="panel-label" style="margin-top:14px;margin-bottom:8px">Comment tone</div>
+        <div class="tone-row">
+          <button class="tone-btn active" data-tone="insightful" onclick="setTone(this)">Insightful</button>
+          <button class="tone-btn" data-tone="question" onclick="setTone(this)">Ask a question</button>
+          <button class="tone-btn" data-tone="agree" onclick="setTone(this)">Agree + expand</button>
+          <button class="tone-btn" data-tone="challenge" onclick="setTone(this)">Respectful challenge</button>
+        </div>
+
+        <button class="btn-primary" id="draftBtn" onclick="draftComment()">
+          Draft comment
+        </button>
+        <div id="draftErr" class="err-msg"></div>
+      </div>
+
+      <!-- RIGHT: Output -->
+      <div class="panel output-panel">
+        <div class="panel-label">Your drafted comment</div>
+        <div id="outputArea">
+          <div class="output-placeholder">Your AI-drafted comment will appear here. Fill in the post details on the left and hit "Draft comment."</div>
+        </div>
+        <div id="outputActions" style="display:none">
+          <div class="output-actions">
+            <button class="btn-sm" id="copyBtn" onclick="copyComment()">Copy comment</button>
+            <button class="btn-sm" onclick="regenComment()">Regenerate</button>
+            <button class="btn-sm btn-add" onclick="addToQueue()">Add to team queue →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUEUE PANE -->
+  <div class="pane" id="pane-queue">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="queue-top">
+      <select id="queueFilter" onchange="loadQueue()">
+        <option value="all">All posts</option>
+        <option value="available">Available</option>
+        <option value="claimed">Claimed</option>
+        <option value="done">Commented</option>
+      </select>
+      <button class="refresh-link" onclick="loadQueue()">Refresh</button>
+    </div>
+    <div id="queueResults"></div>
+  </div>
+
+  <!-- LOG PANE -->
+  <div class="pane" id="pane-log">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:13px;color:#888">Recent team activity</span>
+      <button class="btn-sm btn-danger" onclick="clearLog()">Clear log</button>
+    </div>
+    <div id="logResults"></div>
+  </div>
+</div>
+
+<script>
+const TONE_PROMPTS = {
+  insightful: 'Write an insightful LinkedIn comment (2-4 sentences) that adds a meaningful clinical or scientific perspective — like an expert sharing a nuance or real-world implication. No hashtags. Write only the comment text, nothing else.',
+  question: 'Write a LinkedIn comment (2-3 sentences) ending with a single thought-provoking follow-up question that shows genuine curiosity about the topic. No hashtags. Write only the comment text, nothing else.',
+  agree: 'Write a LinkedIn comment (2-4 sentences) that agrees with the post then meaningfully expands on it with a related point, data point, or personal example. No hashtags. Write only the comment text, nothing else.',
+  challenge: 'Write a respectful LinkedIn comment (2-4 sentences) that offers a gently different or nuanced perspective, pushing back constructively without being dismissive. No hashtags. Write only the comment text, nothing else.'
+};
+
+let myName = '';
+let currentTone = 'insightful';
+let currentComment = '';
+let lastPost = null;
+
+function saveName() { myName = document.getElementById('nameInput').value.trim(); }
+
+function setTone(btn) {
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTone = btn.dataset.tone;
+}
+
+async function getShared(key) {
+  try { const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : []; } catch { return []; }
+}
+async function setShared(key, val) {
+  try { await window.storage.set(key, JSON.stringify(val), true); } catch(e) { console.error(e); }
+}
+
+function switchTab(t) {
+  ['draft','queue','log'].forEach((name, i) => {
+    document.querySelectorAll('.tab')[i].classList.toggle('active', name === t);
+    document.querySelectorAll('.pane')[i].classList.toggle('active', name === t);
+  });
+  if (t === 'queue') loadQueue();
+  if (t === 'log') loadLog();
+}
+
+async function callClaude(system, userMsg) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+  if (!resp.ok) { const t = await resp.text(); throw new Error('API error ' + resp.status + ': ' + t.slice(0,200)); }
+  const data = await resp.json();
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+}
+
+async function draftComment() {
+  const author = document.getElementById('authorName').value.trim();
+  const postText = document.getElementById('postText').value.trim();
+  if (!postText) { document.getElementById('draftErr').textContent = 'Please paste the post text first.'; return; }
+  if (!myName) { document.getElementById('draftErr').textContent = 'Please enter your name at the top.'; return; }
+  document.getElementById('draftErr').textContent = '';
+
+  const btn = document.getElementById('draftBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner white"></span>Drafting…';
+  document.getElementById('outputArea').innerHTML = '<div style="color:#bbb;font-size:13px"><span class="spinner"></span>Writing your comment…</div>';
+  document.getElementById('outputActions').style.display = 'none';
+
+  const role = document.getElementById('authorRole').value.trim();
+
+  lastPost = {
+    id: 'p' + Date.now(),
+    author: author || 'LinkedIn member',
+    role: role,
+    snippet: postText.slice(0, 300) + (postText.length > 300 ? '…' : ''),
+    url: document.getElementById('postUrl').value.trim() || '',
+    status: 'available', claimedBy: null,
+    foundBy: myName, foundAt: new Date().toISOString()
+  };
+
+  try {
+    currentComment = await callClaude(
+      'You draft LinkedIn comments for a medical professional in genetics and cardiology growing their LinkedIn presence. ' + TONE_PROMPTS[currentTone],
+      'LinkedIn post' + (author ? ' by ' + author : '') + (role ? ' (' + role + ')' : '') + ':\n\n"' + postText + '"\n\nWrite the comment.'
+    );
+    lastPost.comment = currentComment;
+
+    document.getElementById('outputArea').innerHTML = '<div class="comment-text" id="commentOut">' + esc(currentComment) + '</div>';
+    document.getElementById('outputActions').style.display = 'block';
+  } catch(e) {
+    document.getElementById('outputArea').innerHTML = '<div class="output-placeholder">Something went wrong: ' + esc(e.message) + '</div>';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Draft comment';
+}
+
+async function regenComment() {
+  const postText = document.getElementById('postText').value.trim();
+  if (!postText) return;
+  const btn = document.getElementById('draftBtn');
+  btn.disabled = true;
+  document.getElementById('outputArea').innerHTML = '<div style="color:#bbb;font-size:13px"><span class="spinner"></span>Regenerating…</div>';
+  document.getElementById('outputActions').style.display = 'none';
+  const author = document.getElementById('authorName').value.trim();
+  const role = document.getElementById('authorRole').value.trim();
+  try {
+    currentComment = await callClaude(
+      'You draft LinkedIn comments for a medical professional in genetics and cardiology. ' + TONE_PROMPTS[currentTone] + ' Write a DIFFERENT comment from any previous ones — vary the angle or opening.',
+      'LinkedIn post' + (author ? ' by ' + author : '') + (role ? ' (' + role + ')' : '') + ':\n\n"' + postText + '"\n\nWrite a fresh comment.'
+    );
+    if (lastPost) lastPost.comment = currentComment;
+    document.getElementById('outputArea').innerHTML = '<div class="comment-text" id="commentOut">' + esc(currentComment) + '</div>';
+    document.getElementById('outputActions').style.display = 'block';
+  } catch(e) {
+    document.getElementById('outputArea').innerHTML = '<div class="output-placeholder">Error: ' + esc(e.message) + '</div>';
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Draft comment';
+}
+
+function copyComment() {
+  const el = document.getElementById('commentOut'); if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy comment'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+async function addToQueue() {
+  if (!lastPost) return;
+  const posts = await getShared('li-posts');
+  if (lastPost.url && posts.find(p => p.url === lastPost.url && lastPost.url !== '')) {
+    alert('This post is already in the team queue.'); return;
+  }
+  posts.push(lastPost);
+  await setShared('li-posts', posts);
+  await addLog(myName + ' added a post' + (lastPost.author !== 'LinkedIn member' ? ' by ' + lastPost.author : '') + ' to the queue');
+  updateQueueCount();
+  const btn = document.querySelector('.btn-add');
+  if (btn) { btn.textContent = 'Added to queue ✓'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'Add to team queue →'; btn.classList.remove('copied'); }, 2500); }
+}
+
+async function loadQueue() {
+  const allPosts = await getShared('li-posts');
+  const filter = (document.getElementById('queueFilter') || {}).value || 'all';
+  const posts = filter === 'all' ? allPosts : allPosts.filter(p => p.status === filter);
+  const el = document.getElementById('queueResults');
+  const total = allPosts.length;
+  const claimed = allPosts.filter(p => p.status === 'claimed').length;
+  const done = allPosts.filter(p => p.status === 'done').length;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total posts</div></div>
+    <div class="stat-card"><div class="stat-num">${claimed}</div><div class="stat-label">Claimed</div></div>
+    <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-label">Commented</div></div>`;
+  if (!posts.length) {
+    el.innerHTML = '<div class="empty">' + (allPosts.length ? 'No posts match this filter.' : 'No posts yet — draft a comment and add it to the queue.') + '</div>';
+    return;
+  }
+  const sorted = [...posts].sort((a, b) => ({available:0,claimed:1,done:2}[a.status] - {available:0,claimed:1,done:2}[b.status]));
+  el.innerHTML = sorted.map(p => {
+    const mine = p.claimedBy === myName;
+    return `<div class="post-card ${p.status}">
+      <div class="post-top">
+        <div class="post-meta">
+          <div class="avatar">${initials(p.author)}</div>
+          <div><div class="post-author">${esc(p.author)}</div><div class="post-role">${esc(p.role || '')}</div></div>
+        </div>
+        <span class="badge badge-${p.status}">${p.status === 'available' ? 'available' : p.status === 'claimed' ? 'claimed by ' + esc(p.claimedBy) : 'commented ✓'}</span>
+      </div>
+      ${p.snippet ? '<div class="post-snippet">"' + esc(p.snippet) + '"</div>' : ''}
+      ${p.url ? '<a class="post-url" href="' + esc(p.url) + '" target="_blank">' + esc(p.url) + '</a>' : ''}
+      ${p.comment ? '<div class="comment-box"><div class="comment-label">drafted comment</div><div class="comment-text-q" id="qc-' + p.id + '">' + esc(p.comment) + '</div></div>' : ''}
+      <div class="card-actions">
+        ${p.comment ? '<button class="btn-sm" onclick="copyById(\'qc-' + p.id + '\',this)">Copy comment</button>' : ''}
+        ${p.status === 'available' ? '<button class="btn-sm btn-claim" onclick="claimPost(\'' + p.id + '\')">Claim</button>' : ''}
+        ${p.status === 'claimed' && mine ? '<button class="btn-sm btn-done" onclick="markDone(\'' + p.id + '\')">Mark as commented</button><button class="btn-sm" onclick="unclaimPost(\'' + p.id + '\')">Unclaim</button>' : ''}
+        ${p.status === 'claimed' && !mine ? '<span style="font-size:12px;color:#8a6000">Claimed by ' + esc(p.claimedBy) + '</span>' : ''}
+        ${p.status === 'done' ? '<span style="font-size:12px;color:#1e6e3a">Commented by ' + esc(p.claimedBy) + '</span>' : ''}
+      </div>
+      <div class="found-by">Added by ${esc(p.foundBy)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function claimPost(id) {
+  if (!myName) { alert('Enter your name at the top first.'); return; }
+  const posts = await getShared('li-posts');
+  const p = posts.find(x => x.id === id);
+  if (!p || p.status !== 'available') { loadQueue(); return; }
+  p.status = 'claimed'; p.claimedBy = myName;
+  await setShared('li-posts', posts);
+  await addLog(myName + ' claimed a post' + (p.author !== 'LinkedIn member' ? ' by ' + p.author : ''));
+  loadQueue(); updateQueueCount();
+}
+
+async function unclaimPost(id) {
+  const posts = await getShared('li-posts');
+  const p = posts.find(x => x.id === id); if (!p) return;
+  p.status = 'available'; p.claimedBy = null;
+  await setShared('li-posts', posts);
+  await addLog(myName + ' unclaimed a post');
+  loadQueue();
+}
+
+async function markDone(id) {
+  const posts = await getShared('li-posts');
+  const p = posts.find(x => x.id === id); if (!p) return;
+  p.status = 'done';
+  await setShared('li-posts', posts);
+  await addLog(myName + ' commented on a post' + (p.author !== 'LinkedIn member' ? ' by ' + p.author : ''));
+  loadQueue(); updateQueueCount();
+}
+
+async function addLog(msg) {
+  const log = await getShared('li-log');
+  log.unshift({ msg, time: new Date().toISOString() });
+  if (log.length > 60) log.length = 60;
+  await setShared('li-log', log);
+}
+
+async function loadLog() {
+  const log = await getShared('li-log');
+  const el = document.getElementById('logResults');
+  if (!log.length) { el.innerHTML = '<div class="empty">No activity yet.</div>'; return; }
+  el.innerHTML = log.map(l => '<div class="log-item"><span class="log-time">' + fmtTime(l.time) + '</span><span>' + esc(l.msg) + '</span></div>').join('');
+}
+
+async function clearLog() {
+  if (!confirm('Clear the activity log?')) return;
+  await setShared('li-log', []); loadLog();
+}
+
+async function updateQueueCount() {
+  const posts = await getShared('li-posts');
+  const el = document.getElementById('queueCount');
+  if (el) el.textContent = posts.length ? ' (' + posts.length + ')' : '';
+}
+
+function copyById(id, btn) {
+  const el = document.getElementById(id); if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const orig = btn.textContent; btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function initials(name) { return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+updateQueueCount();
+</script>
+</body>
+</html>
